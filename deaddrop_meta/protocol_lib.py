@@ -508,19 +508,25 @@ class ProtocolBase(abc.ABC):
         """
         pass
 
-    def to_dict(self) -> dict[str, Any]:
+    @classmethod
+    def to_dict(cls) -> dict[str, Any]:
         """
         Return this protocol's metadata as a dictionary.
 
         Note that for compatibility purposes, ensure that the resulting dictionary
         is completely JSON serializable.
         """
+        # The type ignores below are all the result of properties.
         return {
-            "name": self.name,
-            "description": dedent(self.description).strip(),
-            "version": self.version,
-            "config": self.config_model.model_json_schema(),
+            "name": cls.name,
+            "description": dedent(cls.description).strip(),  # type: ignore[arg-type]
+            "version": cls.version,
+            "config": cls.config_model.model_json_schema(),  # type: ignore[attr-defined]
         }
+
+    @classmethod
+    def to_json(cls, **kwargs) -> str:
+        return json.dumps(cls.to_dict(), **kwargs)
 
 
 def export_all_protocols() -> list[Type[ProtocolBase]]:
@@ -577,6 +583,6 @@ def export_protocols_as_json(protocol_classes: list[Type[ProtocolBase]], **kwarg
     """
     json_objs: list[dict[str, Any]] = []
     for command_class in protocol_classes:
-        json_objs.append(command_class().to_dict())
+        json_objs.append(command_class.to_dict())
 
     return json.dumps(json_objs, **kwargs)
