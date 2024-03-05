@@ -14,7 +14,7 @@ from typing import Any, Type
 import abc
 import json
 
-from deaddrop_meta.argument_lib import ArgumentParser
+from pydantic import BaseModel
 
 
 class SupportedOSTypes(str, Enum):
