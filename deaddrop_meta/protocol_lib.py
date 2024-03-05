@@ -456,39 +456,10 @@ class ProtocolBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def config_parser(self) -> Type[ArgumentParser]:
+    def config_model(self) -> Type[BaseModel]:
         """
-        The configuration (argument) parser for this protocol.
-
-        ---
-
-        The reasoning for reusing ArgumentParser:
-
-        At the end of the day, we could implement configuration for each protocol
-        as a Pydantic model, a dataclass, and a bunch of other things that make
-        sense. But ArgumentParser gives us exactly what we want: a way to expose
-        configurable options for a particular protocol in a platform-independent
-        manner, while still allowing us to use a dictionary of arguments if we
-        really want to.
-
-        At the same time, though, we'd still like to leverage Pydantic models for
-        configuration, just as we are for the control unit. This is a decent
-        compromise between the two,
-
-        I don't really think this is the right way to do this, but let's just try
-        it for now and see how it goes. There's plenty of arguments to be made,
-        and I don't really know what's the best way to do this.
-
-        ```py
-        @abc.abstractmethod
-        def send_msg(cls, msg, **kwargs) -> bytes:
-            pass
-
-        def send_msg(cls, msg, arg_1, arg_2, arg_3) -> bytes:
-            pass
-        ```
-
-        but that violates LSP.
+        The model used to represent the configurable elements of this protocol
+        on each call.
         """
         pass
 
@@ -548,7 +519,7 @@ class ProtocolBase(abc.ABC):
             "name": self.name,
             "description": dedent(self.description).strip(),
             "version": self.version,
-            "arguments": self.config_parser().model_dump()["arguments"],
+            "config": self.config_model.model_json_schema(),
         }
 
 

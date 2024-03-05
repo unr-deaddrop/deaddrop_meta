@@ -19,8 +19,6 @@ from typing import Any, ClassVar, Optional, Type
 
 from pydantic import BaseModel
 
-from deaddrop_meta.argument_lib import ArgumentParser
-
 
 class RendererType(str, Enum):
     """
@@ -124,7 +122,7 @@ class CommandBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def argument_parser(self) -> Type[ArgumentParser]:
+    def argument_model(self) -> Type[BaseModel]:
         pass
 
     @property
@@ -185,10 +183,8 @@ class CommandBase(abc.ABC):
             # `dedent()` removes any leading indentation from the docstring.
             "description": dedent(self.description).strip(),
             "version": self.version,
-            "has_renderer": bool(
-                self.command_renderer
-            ),  # True if one has been assigned.
-            "arguments": self.argument_parser().model_dump()["arguments"],
+            "has_renderer": self.command_renderer is not None,
+            "argument_schema": self.argument_model.model_json_schema(),
         }
 
     def to_json(self, **kwargs) -> str:
