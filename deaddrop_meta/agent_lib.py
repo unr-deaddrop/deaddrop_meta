@@ -14,7 +14,7 @@ from typing import Any, Type
 import abc
 import json
 
-from deaddrop_meta.argument_lib import ArgumentParser
+from pydantic import BaseModel
 
 
 class SupportedOSTypes(str, Enum):
@@ -116,7 +116,8 @@ class AgentBase(abc.ABC):
         """
         pass
 
-    def to_dict(self) -> dict[str, Any]:
+    @classmethod
+    def to_dict(cls) -> dict[str, Any]:
         """
         Convert this agent to a dictionary suitable for export.
 
@@ -140,16 +141,18 @@ class AgentBase(abc.ABC):
 
         As always, ensure that the resulting dictionary is JSON serializable.
         """
+        # The type ignores below are all the result of properties.
         return {
-            "name": self.name,
-            "description": dedent(self.description).strip(),
-            "version": self.version,
-            "author": self.author,
-            "source": self.source,
-            "operating_systems": self.supported_operating_systems,
-            "protocols": self.supported_protocols,
-            "config": self.config_model.model_json_schema(),
+            "name": cls.name,
+            "description": dedent(cls.description).strip(),  # type: ignore[arg-type]
+            "version": cls.version,
+            "author": cls.author,
+            "source": cls.source,
+            "operating_systems": cls.supported_operating_systems,
+            "protocols": cls.supported_protocols,
+            "config": cls.config_model.model_json_schema(),  # type: ignore[attr-defined]
         }
 
-    def to_json(self, **kwargs) -> str:
-        return json.dumps(self.to_dict(), **kwargs)
+    @classmethod
+    def to_json(cls, **kwargs) -> str:
+        return json.dumps(cls.to_dict(), **kwargs)
