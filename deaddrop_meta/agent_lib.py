@@ -110,13 +110,9 @@ class AgentBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def config_parser(self) -> Type[ArgumentParser]:
+    def config_model(self) -> Type[BaseModel]:
         """
-        The configuration/argument parser for this agent.
-
-        See protocol_lib.py for details on why we use ArgumentParser,
-        originally built for commands, as a way to expose the available
-        configuration options for this agent.
+        The model representing all available configuration for this agent.
         """
         pass
 
@@ -152,7 +148,7 @@ class AgentBase(abc.ABC):
             "source": self.source,
             "operating_systems": self.supported_operating_systems,
             "protocols": self.supported_protocols,
-            "config": self.config_parser().model_dump()["arguments"],
+            "config": self.config_model.model_json_schema(),
         }
 
     def to_json(self, **kwargs) -> str:
