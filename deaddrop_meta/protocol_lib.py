@@ -26,7 +26,7 @@ from base64 import b64encode, b64decode
 from datetime import datetime
 from enum import Enum
 from textwrap import dedent
-from typing import Any, Type, Optional, ClassVar, Union
+from typing import Any, Type, Optional, Literal, Union
 from typing_extensions import Annotated
 import abc
 import configparser
@@ -117,20 +117,8 @@ class LogMessage(BaseModel):
     category: Optional[str]
 
 
-class DeadDropMessagePayload(BaseModel, abc.ABC):
-    # Require all payload types to define a message_type. Pydantic does not
-    # really support the idea of an interface using `abc` and then requiring
-    # models to define them as static variables (it raises a warning if you do),
-    # so the method described at https://github.com/pydantic/pydantic/discussions/2410
-    # is used instead.
-    @property
-    @abc.abstractmethod
-    def message_type(self) -> DeadDropMessageType:
-        pass
-
-
-class CommandResponsePayload(DeadDropMessagePayload):
-    message_type: ClassVar[DeadDropMessageType] = DeadDropMessageType.CMD_RESPONSE
+class CommandResponsePayload(BaseModel):
+    message_type: Literal[DeadDropMessageType.CMD_RESPONSE]
 
     # The name of the command executed.
     cmd_name: str
@@ -150,8 +138,8 @@ class CommandResponsePayload(DeadDropMessagePayload):
     result: dict[str, Any]
 
 
-class CommandRequestPayload(DeadDropMessagePayload):
-    message_type: ClassVar[DeadDropMessageType] = DeadDropMessageType.CMD_REQUEST
+class CommandRequestPayload(BaseModel):
+    message_type: Literal[DeadDropMessageType.CMD_REQUEST]
 
     # The agent-specific name of the command to execute.
     cmd_name: str
@@ -182,8 +170,8 @@ class LogBundleFilters(BaseModel):
     task_id: Optional[uuid.UUID]
 
 
-class LogBundlePayload(DeadDropMessagePayload):
-    message_type: ClassVar[DeadDropMessageType] = DeadDropMessageType.LOG_BUNDLE
+class LogBundlePayload(BaseModel):
+    message_type: Literal[DeadDropMessageType.LOG_BUNDLE]
 
     # The list of all log messages associated with this bundle.
     logs: list[LogMessage]
@@ -196,8 +184,8 @@ class LogBundlePayload(DeadDropMessagePayload):
     filters: Optional[LogBundleFilters]
 
 
-class HeartbeatPayload(DeadDropMessagePayload):
-    message_type: ClassVar[DeadDropMessageType] = DeadDropMessageType.HEARTBEAT
+class HeartbeatPayload(BaseModel):
+    message_type: Literal[DeadDropMessageType.HEARTBEAT]
 
     # Any extra diagnostic information that the agent wants to include with the
     # heartbeat. This is agent-specific and is not expected to be used in
@@ -288,11 +276,11 @@ class DeadDropMessage(BaseModel, abc.ABC):
     # Digital signature, if set.
     digest: bytes | None = None
 
-    # I've decided to let Pydantic handle this for any Python components, which 
+    # I've decided to let Pydantic handle this for any Python components, which
     # is every part of the project right now. Converting from ISO 8601 for anything
     # that doesn't use Pydantic is that module's problem.
     #
-    # This also fixes the concern with accidental rounding and imprecision when 
+    # This also fixes the concern with accidental rounding and imprecision when
     # calculating the signature (hopefully).
 
     # @field_serializer("timestamp", when_used="json-unless-none")
