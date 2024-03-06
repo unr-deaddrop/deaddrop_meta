@@ -199,15 +199,18 @@ class CommandBase(abc.ABC):
         must have JSON serializable fields, as dictated by `model_dump()`.
         """
         # The type ignores below are all the result of properties.
-        return {
-            "name": cls.name,
-            # `dedent()` removes any leading indentation from the docstring.
-            "description": dedent(cls.description).strip(),  # type: ignore[arg-type]
-            "version": cls.version,
-            "has_renderer": cls.command_renderer is not None,
-            "argument_schema": cls.argument_model.model_json_schema(),  # type: ignore[attr-defined]
-            "result_schema": cls.result_model.model_json_schema(),  # type: ignore[attr-defined]
-        }
+        try:
+            return {
+                "name": cls.name,
+                # `dedent()` removes any leading indentation from the docstring.
+                "description": dedent(cls.description).strip(),  # type: ignore[arg-type]
+                "version": cls.version,
+                "has_renderer": cls.command_renderer is not None,
+                "argument_schema": cls.argument_model.model_json_schema(),  # type: ignore[attr-defined]
+                "result_schema": cls.result_model.model_json_schema(),  # type: ignore[attr-defined]
+            }
+        except AttributeError as e:
+            raise RuntimeError(f"Did you forget to define a required field for {cls}?") from e
 
     @classmethod
     def to_json(cls, **kwargs) -> str:
