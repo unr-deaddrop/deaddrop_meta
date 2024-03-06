@@ -206,6 +206,7 @@ class CommandBase(abc.ABC):
             "version": cls.version,
             "has_renderer": cls.command_renderer is not None,
             "argument_schema": cls.argument_model.model_json_schema(),  # type: ignore[attr-defined]
+            "result_schema": cls.result_model.model_json_schema(),  # type: ignore[attr-defined]
         }
 
     @classmethod
