@@ -153,7 +153,8 @@ class CommandBase(abc.ABC):
         """
         pass
 
-    def to_dict(self) -> dict[str, Any]:
+    @classmethod
+    def to_dict(cls) -> dict[str, Any]:
         """
         Convert this object to a dictionary suitable for export.
 
@@ -178,17 +179,19 @@ class CommandBase(abc.ABC):
         is completely JSON serializable. By extension, this means that Argument
         must have JSON serializable fields, as dictated by `model_dump()`.
         """
+        # The type ignores below are all the result of properties.
         return {
-            "name": self.name,
+            "name": cls.name,
             # `dedent()` removes any leading indentation from the docstring.
-            "description": dedent(self.description).strip(),
-            "version": self.version,
-            "has_renderer": self.command_renderer is not None,
-            "argument_schema": self.argument_model.model_json_schema(),
+            "description": dedent(cls.description).strip(),  # type: ignore[arg-type]
+            "version": cls.version,
+            "has_renderer": cls.command_renderer is not None,
+            "argument_schema": cls.argument_model.model_json_schema(),  # type: ignore[attr-defined]
         }
 
-    def to_json(self, **kwargs) -> str:
-        return json.dumps(self.to_dict(), **kwargs)
+    @classmethod
+    def to_json(cls, **kwargs) -> str:
+        return json.dumps(cls.to_dict(), **kwargs)
 
 
 def export_all_commands() -> list[Type[CommandBase]]:
@@ -228,6 +231,6 @@ def export_commands_as_json(command_classes: list[Type[CommandBase]], **kwargs):
     """
     json_objs: list[dict[str, Any]] = []
     for command_class in command_classes:
-        json_objs.append(command_class().to_dict())
+        json_objs.append(command_class.to_dict())
 
     return json.dumps(json_objs, **kwargs)
