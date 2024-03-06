@@ -456,7 +456,7 @@ class ProtocolBase(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def config_model(self) -> Type[BaseModel]:
+    def config_model(self) -> Type[ProtocolConfig]:
         """
         The model used to represent the configurable elements of this protocol
         on each call.
