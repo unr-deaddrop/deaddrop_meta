@@ -123,6 +123,25 @@ class CommandBase(abc.ABC):
     @property
     @abc.abstractmethod
     def argument_model(self) -> Type[BaseModel]:
+        """
+        A model containing all of the arguments accepted by this command.
+        """
+        pass
+
+    @property
+    @abc.abstractmethod
+    def result_model(self) -> Type[BaseModel]:
+        """
+        A model containing all of the distinct outputs that this command generates.
+
+        In practice, this is primarily used to allow consumers of command outputs
+        to know what to expect. The immediate result of the `execute_command` function
+        will remain a dictionary of strings to values.
+
+        However, by defining a coherent output schema, this makes it possible (for
+        example) to verify the output of a command server-side when it reaches
+        a client.
+        """
         pass
 
     @property
