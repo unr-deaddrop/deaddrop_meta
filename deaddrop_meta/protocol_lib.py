@@ -514,12 +514,15 @@ class ProtocolBase(abc.ABC):
         is completely JSON serializable.
         """
         # The type ignores below are all the result of properties.
-        return {
-            "name": cls.name,
-            "description": dedent(cls.description).strip(),  # type: ignore[arg-type]
-            "version": cls.version,
-            "config": cls.config_model.model_json_schema(),  # type: ignore[attr-defined]
-        }
+        try:
+            return {
+                "name": cls.name,
+                "description": dedent(cls.description).strip(),  # type: ignore[arg-type]
+                "version": cls.version,
+                "config": cls.config_model.model_json_schema(),  # type: ignore[attr-defined]
+            }
+        except AttributeError as e:
+            raise RuntimeError(f"Did you forget to define a required field for {cls}?") from e
 
     @classmethod
     def to_json(cls, **kwargs) -> str:
