@@ -336,7 +336,7 @@ class DeadDropMessage(BaseModel, abc.ABC):
         """
         On JSON serialization, the digest is base64.
 
-        This differs from the "actual" Pydantic behavior of using \u encoding.
+        This differs from the "actual" Pydantic behavior of using Unicode escapes.
         """
         return b64encode(digest).decode("utf-8")
 
