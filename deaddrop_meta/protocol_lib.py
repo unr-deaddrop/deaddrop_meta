@@ -84,7 +84,7 @@ class DeadDropLogLevel(int, Enum):
 
     DEBUG = logging.DEBUG
     INFO = logging.INFO
-    WARNING = (logging.WARNING,)
+    WARNING = logging.WARNING
     ERROR = logging.ERROR
     CRITICAL = logging.CRITICAL
 
@@ -288,46 +288,55 @@ class DeadDropMessage(BaseModel, abc.ABC):
     # Digital signature, if set.
     digest: bytes | None = None
 
-    @field_serializer("timestamp", when_used="json-unless-none")
-    @classmethod
-    def serialize_timestamp(cls, timestamp: datetime, _info):
-        """
-        On JSON serialization, the timestamp is always numeric.
-        """
-        return timestamp.timestamp()
+    # I've decided to let Pydantic handle this for any Python components, which 
+    # is every part of the project right now. Converting from ISO 8601 for anything
+    # that doesn't use Pydantic is that module's problem.
+    #
+    # This also fixes the concern with accidental rounding and imprecision when 
+    # calculating the signature (hopefully).
 
-    @field_validator("timestamp", mode="before")
-    @classmethod
-    def validate_timestamp(cls, v: Any) -> datetime:
-        """
-        Convert a timestamp back to a native Python datetime object.
-        """
-        if type(v) is datetime:
-            return v
+    # @field_serializer("timestamp", when_used="json-unless-none")
+    # @classmethod
+    # def serialize_timestamp(cls, timestamp: datetime, _info):
+    #     """
+    #     On JSON serialization, the timestamp is always numeric.
+    #     """
+    #     return timestamp.timestamp()
 
-        if type(v) is str:
-            try:
-                return datetime.utcfromtimestamp(float(v))
-            except Exception as e:
-                raise ValueError(
-                    f"Assumed string timestamp conversion of {v} failed."
-                ) from e
+    # @field_validator("timestamp", mode="before")
+    # @classmethod
+    # def validate_timestamp(cls, v: Any) -> datetime:
+    #     """
+    #     Convert a timestamp back to a native Python datetime object.
+    #     """
+    #     if type(v) is datetime:
+    #         return v
 
-        if type(v) is float:
-            try:
-                return datetime.utcfromtimestamp(v)
-            except Exception as e:
-                raise ValueError(
-                    f"Attempted timestamp conversion of {v} failed."
-                ) from e
+    #     if type(v) is str:
+    #         try:
+    #             return datetime.utcfromtimestamp(float(v))
+    #         except Exception as e:
+    #             raise ValueError(
+    #                 f"Assumed string timestamp conversion of {v} failed."
+    #             ) from e
 
-        raise ValueError("Unexpected type for timestamp")
+    #     if type(v) is float:
+    #         try:
+    #             return datetime.utcfromtimestamp(v)
+    #         except Exception as e:
+    #             raise ValueError(
+    #                 f"Attempted timestamp conversion of {v} failed."
+    #             ) from e
+
+    #     raise ValueError("Unexpected type for timestamp")
 
     @field_serializer("digest", when_used="json-unless-none")
     @classmethod
     def serialize_digest(cls, digest: bytes, _info):
         """
         On JSON serialization, the digest is base64.
+
+        This differs from the "actual" Pydantic behavior of using \u encoding.
         """
         return b64encode(digest).decode("utf-8")
 
