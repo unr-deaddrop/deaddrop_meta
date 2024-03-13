@@ -20,6 +20,7 @@ class ServerMessagingData(BaseModel):
     listen_for_id: uuid.UUID
 
     server_private_key: Optional[bytes]
+    preferred_protocol: Optional[str]
 
     @field_validator(
         "server_private_key", mode="before"
