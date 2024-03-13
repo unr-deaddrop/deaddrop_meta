@@ -253,7 +253,7 @@ class DeadDropMessage(BaseModel, abc.ABC):
 
     # The user this message is associated with. May be null if not associated
     # with a user.
-    user_id: uuid.UUID = Field(default_factory=lambda: uuid.UUID(int=0))
+    user_id: int | None = None
 
     # The agent ID, or null if sent by the server.
     source_id: uuid.UUID = Field(default_factory=lambda: uuid.UUID(int=0))
