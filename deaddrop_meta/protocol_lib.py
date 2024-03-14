@@ -377,6 +377,21 @@ class ProtocolConfig(BaseModel, abc.ABC):
         """
         pass
 
+    @property
+    @abc.abstractmethod
+    def convert_to_server_config(self) -> "ProtocolConfig":
+        """
+        Interpreting the current values of the configuration as agent configuration,
+        return a new ProtocolConfig whose values would reflect the configuration
+        needed for the *server* to use the same protocol implementation to send
+        or receive messages from an agent using the original configuration.
+
+        That is to say - if this currently contains configuration for the agent over
+        a specific protocol, this returns a new configuration for the server to use
+        the same protocol to communicate with that agent.
+        """
+        pass
+
     def get_checkin_interval(self) -> int:
         """
         The checkin interval for this protocol.
