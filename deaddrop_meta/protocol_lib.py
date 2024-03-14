@@ -258,7 +258,7 @@ class DeadDropMessage(BaseModel, abc.ABC):
     # The source and destination of the message. The server has a null UUID.
     source_id: uuid.UUID = Field(default_factory=lambda: uuid.UUID(int=0))
     destination_id: uuid.UUID = Field(default_factory=lambda: uuid.UUID(int=0))
-    
+
     # The timestamp that this message was created. Assume UTC.
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
