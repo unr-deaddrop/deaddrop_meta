@@ -522,7 +522,9 @@ class ProtocolBase(abc.ABC):
                 "config": cls.config_model.model_json_schema(),  # type: ignore[attr-defined]
             }
         except AttributeError as e:
-            raise RuntimeError(f"Did you forget to define a required field for {cls}?") from e
+            raise RuntimeError(
+                f"Did you forget to define a required field for {cls}?"
+            ) from e
 
     @classmethod
     def to_json(cls, **kwargs) -> str:
