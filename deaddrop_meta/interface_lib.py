@@ -62,5 +62,5 @@ class MessagingObject(BaseModel):
     agent_config: dict[str, Any]
     protocol_config: dict[str, Any]
     protocol_state: Optional[dict[str, Any]]
-    model_data: EndpointMessagingData
+    endpoint_model_data: EndpointMessagingData
     server_config: ServerMessagingData
