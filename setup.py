@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="deaddrop_meta",
-    version="0.0.1",
+    version="0.0.2",
     description="Meta class definitions for the DeadDrop architecture",
     url="https://github.com/unr-deaddrop/deaddrop_meta",
     author="lgactna",
