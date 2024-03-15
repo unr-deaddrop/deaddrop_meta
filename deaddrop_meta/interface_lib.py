@@ -20,10 +20,10 @@ class EndpointMessagingData(BaseModel):
 
 class ServerMessagingData(BaseModel):
     action: Union[Literal["send"], Literal["receive"]]
-    listen_for_id: uuid.UUID
-
-    server_private_key: Optional[bytes]
-    preferred_protocol: Optional[str]
+    
+    listen_for_id: Optional[uuid.UUID] = None
+    server_private_key: Optional[bytes] = None
+    preferred_protocol: Optional[str] = None
 
     @field_validator("server_private_key", mode="before")
     @classmethod
