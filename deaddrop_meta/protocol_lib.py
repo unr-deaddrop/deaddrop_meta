@@ -45,6 +45,7 @@ from pydantic import (
 )
 
 from deaddrop_meta.argument_lib import ArgumentParser
+from deaddrop_meta.interface_lib import EndpointMessagingData
 
 
 class DeadDropMessageType(str, Enum):
@@ -378,7 +379,7 @@ class ProtocolConfig(BaseModel, abc.ABC):
         pass
 
     @abc.abstractmethod
-    def convert_to_server_config(self) -> "ProtocolConfig":
+    def convert_to_server_config(self, endpoint: EndpointMessagingData) -> "ProtocolConfig":
         """
         Interpreting the current values of the configuration as agent configuration,
         return a new ProtocolConfig whose values would reflect the configuration
@@ -388,6 +389,12 @@ class ProtocolConfig(BaseModel, abc.ABC):
         That is to say - if this currently contains configuration for the agent over
         a specific protocol, this returns a new configuration for the server to use
         the same protocol to communicate with that agent.
+        
+        `endpoint` contains server-specific information that is not necessarily
+        known to an agent instance, such as its own IP address or hostname, but
+        is required for the server to communicate with this agent. Since the
+        agent's own code is being reused to send messages, this additional data
+        is required.
         """
         pass
 
