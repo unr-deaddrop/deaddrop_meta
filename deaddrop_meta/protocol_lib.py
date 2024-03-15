@@ -377,7 +377,6 @@ class ProtocolConfig(BaseModel, abc.ABC):
         """
         pass
 
-    @property
     @abc.abstractmethod
     def convert_to_server_config(self) -> "ProtocolConfig":
         """
