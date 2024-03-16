@@ -262,7 +262,7 @@ class DeadDropMessage(BaseModel, abc.ABC):
     destination_id: uuid.UUID = Field(default_factory=lambda: uuid.UUID(int=0))
 
     # The timestamp that this message was created. Assume UTC.
-    timestamp: AwareDatetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
+    timestamp: AwareDatetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC))
 
     # The payload of the underlying message type. Four built-in message types with
     # well-defined payload structures are inherently provided by the framework.
