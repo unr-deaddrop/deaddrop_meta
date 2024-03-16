@@ -23,13 +23,13 @@ handled by an initial setup script at the OS level.
 """
 
 from base64 import b64encode, b64decode
-from datetime import datetime
 from enum import Enum
 from textwrap import dedent
 from typing import Any, Type, Optional, Literal, Union
 from typing_extensions import Annotated
 import abc
 import configparser
+import datetime
 import logging
 import uuid
 import json
@@ -42,6 +42,7 @@ from pydantic import (
     Discriminator,
     Tag,
     ValidationError,
+    AwareDatetime
 )
 
 from deaddrop_meta.argument_lib import ArgumentParser
@@ -105,7 +106,7 @@ class LogMessage(BaseModel):
 
     # The timestamp that this log was generated. This is different from the
     # timestamp of the log bundle.
-    timestamp: datetime
+    timestamp: AwareDatetime
 
     # If associated with a task, the actual task ID for this log message. If
     # not associated with a task (e.g. it's an overhead debug message), this
@@ -126,8 +127,8 @@ class CommandResponsePayload(BaseModel):
 
     # The start and finish time of the command, as measured by an agent's own
     # command module.
-    start_time: datetime
-    end_time: datetime
+    start_time: AwareDatetime
+    end_time: AwareDatetime
 
     # The UUID of the original command_request message that caused this command
     # to execute.
@@ -157,8 +158,8 @@ class LogBundleFilters(BaseModel):
     """
 
     # The time ranges to match. Both inclusive (to the precision available).
-    min_time: Optional[datetime]
-    max_time: Optional[datetime]
+    min_time: Optional[AwareDatetime]
+    max_time: Optional[AwareDatetime]
 
     # The logging level to match. Both inclusive.
     min_level: Optional[DeadDropLogLevel]
@@ -261,7 +262,7 @@ class DeadDropMessage(BaseModel, abc.ABC):
     destination_id: uuid.UUID = Field(default_factory=lambda: uuid.UUID(int=0))
 
     # The timestamp that this message was created. Assume UTC.
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: AwareDatetime = Field(default_factory=datetime.datetime.now(datetime.UTC))
 
     # The payload of the underlying message type. Four built-in message types with
     # well-defined payload structures are inherently provided by the framework.
