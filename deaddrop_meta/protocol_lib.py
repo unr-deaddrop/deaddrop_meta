@@ -563,7 +563,7 @@ class ProtocolBase(abc.ABC):
         Receive all new messages as bytes.
 
         This operates identically to get_new_msgs, except that it returns its
-        messages as raw bytes instead of
+        messages as raw bytes instead of DeadDropMessage instances.
         """
         raise NotImplementedError
 
