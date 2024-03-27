@@ -42,7 +42,7 @@ from pydantic import (
     Discriminator,
     Tag,
     ValidationError,
-    AwareDatetime
+    AwareDatetime,
 )
 
 from deaddrop_meta.argument_lib import ArgumentParser
@@ -262,7 +262,9 @@ class DeadDropMessage(BaseModel, abc.ABC):
     destination_id: uuid.UUID = Field(default_factory=lambda: uuid.UUID(int=0))
 
     # The timestamp that this message was created. Assume UTC.
-    timestamp: AwareDatetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC))
+    timestamp: AwareDatetime = Field(
+        default_factory=lambda: datetime.datetime.now(datetime.UTC)
+    )
 
     # The payload of the underlying message type. Four built-in message types with
     # well-defined payload structures are inherently provided by the framework.
@@ -380,7 +382,9 @@ class ProtocolConfig(BaseModel, abc.ABC):
         pass
 
     @abc.abstractmethod
-    def convert_to_server_config(self, endpoint: EndpointMessagingData) -> "ProtocolConfig":
+    def convert_to_server_config(
+        self, endpoint: EndpointMessagingData
+    ) -> "ProtocolConfig":
         """
         Interpreting the current values of the configuration as agent configuration,
         return a new ProtocolConfig whose values would reflect the configuration
@@ -390,7 +394,7 @@ class ProtocolConfig(BaseModel, abc.ABC):
         That is to say - if this currently contains configuration for the agent over
         a specific protocol, this returns a new configuration for the server to use
         the same protocol to communicate with that agent.
-        
+
         `endpoint` contains server-specific information that is not necessarily
         known to an agent instance, such as its own IP address or hostname, but
         is required for the server to communicate with this agent. Since the
@@ -483,11 +487,23 @@ class ProtocolBase(abc.ABC):
         """
         pass
 
+    @property
+    @abc.abstractmethod
+    def supports_bytes(self) -> bool:
+        """
+        Whether this protocol supports sending arbitrary bytes instead of
+        DeadDropMessage instances.
+
+        If `True`, `send_msg_bytes` and `get_new_messages_bytes` are available
+        alternatives to their DeadDropMessage counterparts.
+        """
+        pass
+
     @classmethod
     @abc.abstractmethod
     def send_msg(cls, msg: DeadDropMessage, args: dict[str, Any]) -> dict[str, Any]:
         """
-        Send an arbitrary binary message.
+        Send an arbitrary plaintext DeadDrop message.
 
         This function should implement any mechanisms needed to split messages,
         place messages at an agreed-upon location, and so on. If any additional
@@ -501,9 +517,22 @@ class ProtocolBase(abc.ABC):
         structure may be anything; it is up to the agent core to decide how to
         handle the responses of a particular protocol implementation.
 
-        :param msg: The binary message to send.
+        :param msg: The DeadDrop message to send.
+        :param args: Any additional protocol-specific arguments.
         """
         pass
+
+    @classmethod
+    def send_msg_bytes(cls, msg: bytes, args: dict[str, Any]) -> dict[str, Any]:
+        """
+        Send an arbitrary binary message.
+
+        The functionality is identical to that of `send_msg()`.
+
+        :param msg: The DeadDrop message to send.
+        :param args: Any additional protocol-specific arguments.
+        """
+        raise NotImplementedError
 
     @classmethod
     @abc.abstractmethod
@@ -527,6 +556,16 @@ class ProtocolBase(abc.ABC):
         This function may raise exceptions, such as if a service is inaccessible.
         """
         pass
+
+    @classmethod
+    def get_new_messages_bytes(cls, args: dict[str, Any]) -> list[bytes]:
+        """
+        Receive all new messages as bytes.
+
+        This operates identically to get_new_msgs, except that it returns its
+        messages as raw bytes instead of
+        """
+        raise NotImplementedError
 
     @classmethod
     def to_dict(cls) -> dict[str, Any]:
